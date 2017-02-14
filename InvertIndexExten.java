@@ -29,18 +29,12 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class InvertIndexExten extends Configured implements Tool {	
    
-   private enum ONLY_WORD_COUNTER {
-		  PG100,
-		  PG31100,
-		  PG3200
-		 }
-	
    public static void main(String[] args) throws Exception {
       System.out.println(Arrays.toString(args));
       
       Configuration conf = new Configuration();
       conf.set("StopWordsFileName", args[2]);
-//      conf.set("mapreduce.map.output.compress", "true");
+      // set the 3rd argument to the variable StopWordsFileName
       int res = ToolRunner.run(conf, new InvertIndexExten(), args);
 	  
       
@@ -82,18 +76,18 @@ public class InvertIndexExten extends Configured implements Tool {
       public void loadStopWords(String filename) throws IOException{
     	  Path pt=new Path(filename);//Location of file in HDFS
           FileSystem fs = FileSystem.get(new Configuration());
-    	  BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(pt)));
+    	  BufferedReader BR = new BufferedReader(new InputStreamReader(fs.open(pt)));
     		  
-    	  String sCurrentLine;
+    	  String CurrentLine;
     	      
-          while ((sCurrentLine = br.readLine()) != null) {
-        	  String stopWord = sCurrentLine.replaceAll("[^A-Za-z]+", "");
-        	  Text t = new Text();
-        	  t.set(stopWord);
-        	  stopWords.add(t);
+          while ((CurrentLine = BR.readLine()) != null) {
+        	  String stopWord = CurrentLine.replaceAll("[^A-Za-z]+", "");
+        	  Text txt = new Text();
+        	  txt.set(stopWord);
+        	  stopWords.add(txt);
     	  }
           
-          br.close();
+          BR.close();
           
           return;
        }
@@ -129,8 +123,10 @@ public class InvertIndexExten extends Configured implements Tool {
          }
          Set<Text> filenames = new HashSet<Text>(res);
          String output = new String();
+         // not use the class TextArray defined in InvertIndex anymore, but use the collections
          for (Text txt : filenames){
         	 output += txt.toString()+'#'+Collections.frequency(res, txt);
+        	 // Collections.frequency(res, txt) would return directly the word frequency of txt in res
         	 output += ',';
          }
          output = output.substring(0, output.length()-1);

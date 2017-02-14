@@ -14,7 +14,6 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -29,6 +28,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class InvertIndex extends Configured implements Tool {	
+   // this is my counters
    private enum MyCounter {
 		  PG100,
 		  PG31100,
@@ -36,12 +36,12 @@ public class InvertIndex extends Configured implements Tool {
    }
    public static void main(String[] args) throws Exception {
       System.out.println(Arrays.toString(args));
-      
+      //from now on the first argument would be a repository where we stock all the 3 txt together, which is more practical than before
       Configuration conf = new Configuration();
-      conf.set("StopWordsFileName", args[2]);
+      conf.set("StopWordsFile", args[2]);
+      // set the 3rd argument to the variable StopWordsFileName
       int res = ToolRunner.run(conf, new InvertIndex(), args);
 	  
-      
       System.exit(res);
    }
 
@@ -69,6 +69,7 @@ public class InvertIndex extends Configured implements Tool {
       job.waitForCompletion(true);
       
       Integer i;
+      // set correspond values to every my counters
       PrintWriter writer = new PrintWriter(args[3], "UTF-8");
       i = (int) job.getCounters().findCounter(MyCounter.PG100).getValue();
       writer.println("PG100: "+i.toString()+"\n");
@@ -107,7 +108,7 @@ public class InvertIndex extends Configured implements Tool {
       
       public void setup(Context context) throws IOException,InterruptedException { 
     	 super.setup(context);
-    	 String filename = context.getConfiguration().get("StopWordsFileName");
+    	 String filename = context.getConfiguration().get("StopWordsFile");
     	 loadStopWords(filename);
       }
 
@@ -119,7 +120,7 @@ public class InvertIndex extends Configured implements Tool {
     	 //String one = String.valueOf(1);
     	 filename.set(name);
          for (String token: value.toString().split("\\s+|-{2,}+")) {
-        	 
+        	// delete all chars that are not alphabet and transfer capital letters to lower case
             word.set(token.replaceAll("[^A-Za-z]+", "").toLowerCase());
             if (!stopWords.contains(word)){
                context.write(word, filename);            	

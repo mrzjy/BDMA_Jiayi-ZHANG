@@ -21,6 +21,10 @@ import org.apache.hadoop.util.ToolRunner;
 public class WordCount extends Configured implements Tool {
    public static void main(String[] args) throws Exception {
       System.out.println(Arrays.toString(args));
+      Configuration conf = new Configuration();
+      //conf.set("mapreduce.map.output.compress", "true");
+      
+      // here the argument would be like : txt1 output1 txt2 output2 txt2 output2, which is improved in next two java codes
       String[] arg1 = new String[2];String[] arg2 = new String[2];String[] arg3 = new String[2];
       arg1[0] = args[0];arg1[1] = args[1];
       arg2[0] = args[2];arg2[1] = args[3];
@@ -81,6 +85,7 @@ public class WordCount extends Configured implements Tool {
             sum += val.get();
          }
          if (sum > 4000){
+        	 // select only the stoop words
          	context.write(key, new IntWritable(sum));
          }
       }
