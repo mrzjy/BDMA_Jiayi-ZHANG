@@ -7,7 +7,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -129,7 +132,7 @@ public class InvertIndex extends Configured implements Tool {
       }
    }
 
-   public static class Reduce extends Reducer<Text, Text, Text, TextArray> {
+   public static class Reduce extends Reducer<Text, Text, Text, Text> {
       @Override
       public void reduce(Text key, Iterable<Text> values, Context context)
               throws IOException, InterruptedException {
@@ -154,41 +157,20 @@ public class InvertIndex extends Configured implements Tool {
 	    		     break;
 	         }
          }
-         Text[] arr = new Text[res.size()];
-         arr = res.toArray(arr);
-         TextArray output = new TextArray(arr);
-         output.set(arr);
-         context.write(key, output);
+         Set<Text> filenames = new HashSet<Text>(res);
+         String output = new String();
+         // store the documents where appears the word 
+         for (Text txt : filenames){
+        	 output += txt.toString();
+        	 output += ',';
+         }
+         output = output.substring(0, output.length()-1);
+         Text Output = new Text();
+         // transform output from string to text
+         Output.set(output);
+         context.write(key, Output);
       }
    }
    
-   public static class TextArray extends ArrayWritable {
-	    public TextArray(Text[] arr) {
-	        super(Text.class);
-	    }
-
-	    @Override
-	    public Text[] get() {
-	        return (Text[]) super.get();
-	    }
-
-	    @Override
-	    public void write(DataOutput arg0) throws IOException {
-	        for(Text data : get()){
-	            data.write(arg0);
-	        }
-	    }
-	    
-	    @Override
-	    public String toString() {
-	        Text[] values = get();
-	        String output = new String();
-	        for (Text t: values){
-		        output += t.toString();
-		        output += ",";
-	        }
-	        output = output.substring(0, output.length()-1);
-	        return output;
-	    }
-	}   
+      
 }

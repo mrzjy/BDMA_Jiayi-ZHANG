@@ -123,16 +123,16 @@ public class InvertIndexExten extends Configured implements Tool {
          }
          Set<Text> filenames = new HashSet<Text>(res);
          String output = new String();
-         // not use the class TextArray defined in InvertIndex anymore, but use the collections
+         // store the documents where appears the word 
          for (Text txt : filenames){
         	 output += txt.toString()+'#'+Collections.frequency(res, txt);
         	 // Collections.frequency(res, txt) would return directly the word frequency of txt in res
         	 output += ',';
          }
          output = output.substring(0, output.length()-1);
-         Text value = new Text();
-         value.set(output);
-         context.write(key, value);
+         Text Output = new Text();
+         Output.set(output);
+         context.write(key, Output);
       }
    }   
 }
